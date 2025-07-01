@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Dispenser extends Model
 {
     use SoftDeletes;
+
+    
 }

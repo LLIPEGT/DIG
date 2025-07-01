@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    //use HasFactory, Notifiable;
     use SoftDeletes;
 
     /**
@@ -19,21 +20,22 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
+    /*protected $fillable = [
         'name',
         'email',
+        'cpf',
         'password',
-    ];
+    ];*/
 
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
      */
-    protected $hidden = [
+    /*protected $hidden = [
         'password',
         'remember_token',
-    ];
+    ];/*
 
     /**
      * Get the attributes that should be cast.
@@ -46,5 +48,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function venda(){
+        return $this->hasMany(Venda::class);
     }
 }

@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Marca extends Model
 {
     use SoftDeletes;
+
+    public function produto(){
+        return $this->hasMany(Produto::class);
+    }
 }
