@@ -41,7 +41,7 @@ class CarrinhodeComprasController extends Controller
     {
         $carrinho = Venda::with('produtos')->find($id);
 
-        if(isset($carrinho)) return $carrinho;
+        if(isset($carrinho)) return response()->json($carrinho);
 
         return "Error";
     }
@@ -59,6 +59,10 @@ class CarrinhodeComprasController extends Controller
      */
     public function update(Request $request, string $id)
     {
+         $validate = $request->validate([
+            'produto_id' => 'required|exists:produtos,id',
+        ]);
+
         $carrinho = Venda::find($id);
 
         if(isset($carrinho)) {

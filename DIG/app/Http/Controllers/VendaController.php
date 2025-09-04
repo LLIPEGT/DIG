@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Venda;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VendaController extends Controller
 {
@@ -30,11 +31,22 @@ class VendaController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'quantidade_total' => 'required|numeric|min:0', // Garante que a quantidade seja válida
+        ]);
+
+        // Verifica se o usuário está autenticado
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Usuário não autenticado'], 401); // Retorna erro se o usuário não estiver autenticado
+        }
+
         $venda = new Venda();
 
         if (isset($venda)){
-            $venda->user_id = $request->user_id;
+            $venda->user_id = Auth::user()->id;
+            $venda->quantidade_total = $request->quantidade_total;
             $venda->save();
+
             return 'Venda criada';
         }
         return 'Error';
