@@ -35,7 +35,7 @@ class VendaController extends Controller
             'quantidade_total' => 'required|numeric|min:0', // Garante que a quantidade seja válida
         ]);
 
-        // Verifica se o usuário está autenticado
+
         if (!Auth::check()) {
             return response()->json(['message' => 'Usuário não autenticado'], 401); // Retorna erro se o usuário não estiver autenticado
         }

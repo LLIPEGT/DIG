@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Marca;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 class MarcaController extends Controller
 {
@@ -12,9 +14,14 @@ class MarcaController extends Controller
      */
     public function index()
     {
-        $marca = Marca::all();
 
-        return $marca;
+        $data = Marca::all();
+
+        if(Auth::check() && Auth::user()){
+            return view("marca.index", compact('data'));
+        }
+        return "ERROR";
+
     }
 
     /**
@@ -22,7 +29,11 @@ class MarcaController extends Controller
      */
     public function create()
     {
-        //
+        $marca = new Marca();
+
+        if(isset($marca)) return view('marca.create', compact('marca'));
+
+        return "ERROR";
     }
 
     /**
@@ -35,7 +46,7 @@ class MarcaController extends Controller
         if (isset($marca)){
             $marca->nome = $request->nome;
             $marca->save();
-            return 'Marca criada';
+            return redirect()->route('marca.index');
         }
 
         return 'error';
@@ -48,9 +59,9 @@ class MarcaController extends Controller
     {
         $marca = Marca::find($id);
 
-        if(isset($marca)) return $marca;
+        if(isset($marca)) return view('marca.show', compact('marca'));
 
-        return 'error';
+        return "Error";
     }
 
     /**
@@ -58,7 +69,12 @@ class MarcaController extends Controller
      */
     public function edit(string $id)
     {
-        //
+
+        $marca = Marca::find($id);
+
+        if(isset($marca)) return view('marca.edit', compact('marca'));
+
+        return "ERROR";
     }
 
     /**
@@ -71,7 +87,7 @@ class MarcaController extends Controller
         if(isset($marca)){
             $marca->nome = $request->nome;
             $marca->save();
-            return 'Marca atualizada';
+            return redirect()->route('marca.index');
         }
         return 'Error';
     }
@@ -83,7 +99,7 @@ class MarcaController extends Controller
     {
         $marca = Marca::find($id);
 
-        if($marca->delete()) return 'Marca deletada';
+        if($marca->delete()) return redirect()->route('marca.index');
 
         return 'Error';
     }

@@ -20,39 +20,42 @@ class AuthController extends Controller
 
     }
 
+    function abrirLogin() {
+        return view('auth.login');
+    }
+
     function login(Request $request) {
         $validated = $request->validate([
-            'cpf' => 'required|string|max:11',
-            'password' => 'required|min:6',
+            'cpf' => 'required|string',
+            'password' => 'required',
         ]);
 
         if(Auth::attempt($validated)) {
             $user = User::where('cpf', $validated['cpf'])->first();
-            printf($user);
-            $token = $user->createToken('api-token',  ['post:red', 'post:create'])->plainTextToken;
-
-            return response()->json(['ok' => true, 'token' => $token]);
+            $user = Auth::user();
+           /*return response()->json([
+            'ok'    => true,
+            'token' => $token,
+            'user'  => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+                'cpf'   => $user->cpf,
+            ],
+           ]);*/
+           return view('home.index', compact('user'));
         }
 
-        return "error";
+        return "error 1";
     }
 
     function logout(Request $request){
-        $token = $request->bearerToken();
+        Auth::logout();
 
-        if(!$token){
-            return response()->json(['ok' => false, 'msg' => 'Error, token não encontrado']);
-        }
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        $acess_token = PersonalAccessToken::findToken($token);
-
-        if(!$acess_token){
-            return response()->json(['ok' => false, 'msg' => 'Error, não tem um token de acesso']);
-        }
-
-        $acess_token->delete($token);
-
-        return response()->json(['ok' => true, 'msg' => 'Token deletado', 'token' => $token]);
+        return redirect()->route('login');
 
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Marca;
 use App\Models\Produto;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
@@ -12,9 +14,9 @@ class ProdutoController extends Controller
      */
     public function index()
     {
-        $produto = Produto::with('marca')->get();
+        $data = Produto::with('marca')->get();
 
-        return $produto;
+        return view('produto.index', compact('data'));
     }
 
     /**
@@ -22,7 +24,12 @@ class ProdutoController extends Controller
      */
     public function create()
     {
-        //
+        $produto = new Produto();
+        $marca = Marca::all();
+
+        if (isset($produto)) return view('produto.create', compact("produto", "marca"));
+
+        return "Error";
     }
 
     /**
@@ -34,10 +41,11 @@ class ProdutoController extends Controller
 
         if(isset($produto)){
             $produto->nome = $request->nome;
-            $produto->quantidadeKg = $request->quantidadeKg;
+            $produto->preco = $request->preco;
+            $produto->quantidade_estoque = $request->quantidade_estoque;
             $produto->marca_id = $request->marca_id;
             $produto->save();
-            return "Produto criado";
+            return redirect()->route('produto.index');
         }
         return "Error";
     }
@@ -48,7 +56,7 @@ class ProdutoController extends Controller
     public function show(string $id)
     {
         $produto = Produto::find($id);
-        if(isset($produto)) return $produto;
+        if(isset($produto)) return view('produto.show', compact('produto'));
 
         return 'Error';
     }
@@ -58,7 +66,12 @@ class ProdutoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $produto = Produto::find($id);
+        $marca = Marca::all();
+
+        if(isset($produto)) return view('produto.edit', compact('produto', 'marca'));
+
+        return "ERROR";
     }
 
     /**
@@ -70,9 +83,11 @@ class ProdutoController extends Controller
 
         if (isset($produto)) {
             $produto->nome = $request->nome;
+            $produto->preco = $request->preco;
+            $produto->quantidade_estoque = $request->quantidade_estoque;
             $produto->marca_id = $request->marca_id;
             $produto->save();
-            return "Produto atualizado";
+            return redirect()->route('produto.index');
         }
 
         return 'Error';
@@ -85,7 +100,7 @@ class ProdutoController extends Controller
     {
         $produto = Produto::find($id);
 
-        if($produto->delete()) return 'Produto deletado';
+        if($produto->delete()) return redirect()->route('produto.index');
 
         return 'Error';
     }

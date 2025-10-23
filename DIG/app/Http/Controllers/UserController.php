@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\View\Components\alert;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -14,7 +16,7 @@ class UserController extends Controller
     {
         $data = User::all();
 
-        return $data;
+        return view('usuario.index', compact('data'));
     }
 
     /**
@@ -22,7 +24,10 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $user = new User();
+
+        return view('usuario.create', compact("user"));
+
     }
 
     /**
@@ -30,16 +35,25 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'cpf' => 'required|string|unique:users,cpf',
+            'password' => 'required|string|min:6',
+        ]);
         $user = new User();
 
-        if(isset($user)){
+        if(isset($user) && $request){
             $user->name = $request->name;
             $user->email = $request->email;
             $user->cpf = $request->cpf;
-            $user->password = $request->password;
-            $user->save();
+            $user->password = Hash::make($request->password);
+            if($user){
+                $user->save();
+            }
 
-            return 'Usuário criado';
+
+            return redirect()->route('usuario.index');
         }
         return "Error";
     }
@@ -51,9 +65,9 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
-        if (isset($user)) return $user;
+        if (isset($user))  return view('usuario.show', compact('user'));;
 
-        return 'Usuário não encontrado';
+        return "ERROR";
     }
 
     /**
@@ -61,7 +75,14 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $user = User::find($id);
+
+
+        if(isset($user)){
+            return view('usuario.edit', compact('user'));
+        }
+
+        return "error";
     }
 
     /**
@@ -74,10 +95,10 @@ class UserController extends Controller
         if(isset($user)){
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->password = $request->password;
+            $user->password = Hash::make($request->password);
             $user->save();
 
-            return 'Usuário atualizado';
+            return redirect()->route('usuario.index');
         }
 
         return 'Error';
@@ -88,10 +109,10 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        $user = User::find($id);
+        $data = User::find($id);
 
-        if($user->delete())
-             return 'Usuário deletado';
+        if($data->delete())
+              return redirect()->route('usuario.index');
 
         return 'Error';
     }

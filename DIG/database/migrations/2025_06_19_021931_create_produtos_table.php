@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('produtos', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
-            $table->float('quantidadeKg');
+            $table->float('preco');
+            $table->float('quantidade_estoque');
             $table->unsignedBigInteger('marca_id');
             $table->foreign('marca_id')->references('id')->on('marcas');
             $table->softDeletes();

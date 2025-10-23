@@ -5,12 +5,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function() {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('/login', [AuthController::class, 'abrirLogin'])->name('login')->middleware('guest');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
 });
 
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');

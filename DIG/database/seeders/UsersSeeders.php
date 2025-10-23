@@ -19,7 +19,7 @@ class UsersSeeders extends Seeder
             'name' => 'Teste Fernandes',
             'email' => 'teste'.'@example.com',
             'cpf' => '10171179910',
-            'password' => Hash::make('senha123'),
+            'password' => 'senha123',
         ]);
     }
 }
