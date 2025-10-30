@@ -38,12 +38,13 @@
     </ul>
 
     <!-- Botão sair no rodapé - estilizado com rounded-pill para modernidade -->
-    <div class="mt-auto pt-3"> <!-- pt-3 para separação sutil sem borda -->
-        <a href="{{ route('logout') }}" class="btn btn-outline-secondary w-100 rounded-pill d-flex align-items-center justify-content-center py-2">
+    <form action="{{ route('logout', Auth::user()) }}" method="POST" class="w-100">
+        @csrf
+        <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill d-flex align-items-center justify-content-center py-2">
             <i class="bi bi-box-arrow-right me-2"></i>
             Sair
-        </a>
-    </div>
+        </button>
+    </form>
 </nav>
 
 <style>

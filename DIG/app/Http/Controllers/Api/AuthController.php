@@ -49,13 +49,13 @@ class AuthController extends Controller
         return "error 1";
     }
 
-    function logout(Request $request){
-        Auth::logout();
+    public function logout(Request $request)
+    {
+        Auth::guard('web')->logout(); // ✅ força o logout do guard de sessão
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
-
+        return redirect()->route('login'); // ✅ melhor redirecionar, em vez de retornar view
     }
 }

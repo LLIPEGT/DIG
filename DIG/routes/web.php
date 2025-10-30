@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\CarrinhodeComprasController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarcaController;
@@ -8,8 +9,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendaController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/login', [AuthController::class, 'abrirLogin'])->name('login')->middleware('guest');
+Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
+
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth:sanctum');
+Route::prefix('api')->group(function () {
 
     Route::resource('/user', UserController::class)->names([
         'index'   => 'usuario.index',
@@ -29,7 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'edit'    => 'marca.edit',
         'update'  => 'marca.update',
         'destroy' => 'marca.destroy',
-    ])->middleware('checkuser');
+    ]);
 
     Route::resource('/venda', VendaController::class);
 
@@ -45,5 +50,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::resource('/carrinho', CarrinhodeComprasController::class);
 
-});
+})->middleware(['auth:sanctum', 'CheckUser']);
 

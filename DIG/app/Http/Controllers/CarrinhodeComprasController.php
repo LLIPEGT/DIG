@@ -66,6 +66,7 @@ class CarrinhodeComprasController extends Controller
         $carrinho = Venda::find($id);
 
         if(isset($carrinho)) {
+            
             $carrinho->produtos()->attach($request->produto_id);
             $carrinho->save();
 

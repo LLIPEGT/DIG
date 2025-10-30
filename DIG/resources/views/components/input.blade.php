@@ -1,16 +1,17 @@
-<div class="mb-3">
-    <span>
-        <label for="{{ $name }}" class="form-label">{{ $label }}</label>
-    </span>
+{{-- resources/views/components/input.blade.php --}}
+<div class="mb-3 position-relative">
+    <label for="{{ $name }}" class="form-label">{{ $label }}</label>
 
-    <div class="input">
-        <input
-            type="{{ $type ?? 'text' }}"
-            class="form-control"
-            id="{{ $name }}"
-            name="{{ $name }}"
-            aria-label="{{ $label }}"
-            {{ $attributes }}
-        >
-    </div>
+    @isset($icon)
+        <i class="bi bi-{{ $icon }} form-icon"></i>
+    @endisset
+
+    <input
+        type="{{ $type ?? 'text' }}"
+        class="form-control form-control-with-icon"
+        id="{{ $name }}"
+        name="{{ $name }}"
+        aria-label="{{ $label }}"
+        {{ $attributes }}
+    >
 </div>

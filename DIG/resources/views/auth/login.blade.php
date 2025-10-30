@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - DIG</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
@@ -28,7 +25,7 @@
         }
 
         .btn-custom:hover {
-            background-color: #5b4032;
+            background-color: #c07547c0;
             color: #fff;
         }
 
@@ -39,8 +36,6 @@
 
         .form-icon {
             position: absolute;
-            top: 10px;
-            left: 15px;
             color: #aaa;
         }
 
@@ -54,11 +49,14 @@
     <div class="card shadow-sm p-4 login-card">
         <div class="card-body text-center">
             <!-- Logo -->
-            <img src="{{ asset('img/logo.png') }}" alt="Logo" class="logo">
+            <div class="d-flex align-items-center justify-content-center mb-3 gap-2">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo" class="logo">
+                <h1 class="fw-bold mb-0">DIG</h1>
+            </div>
 
             <h3 class="mb-3">Acesse sua conta</h3>
 
-            <!-- Sessão de erro -->
+            <!-- Mensagem de erro -->
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show text-start" role="alert">
                     {{ session('error') }}
@@ -66,24 +64,29 @@
                 </div>
             @endif
 
+            <!-- Formulário -->
             <form method="POST" action="{{ route('login') }}" class="text-start">
                 @csrf
 
                 <!-- Campo CPF -->
-                <div class="mb-3 position-relative">
-                    <label for="cpf" class="form-label">CPF</label>
-                    <i class="bi bi-person form-icon"></i>
-                    <input type="text" id="cpf" name="cpf" class="form-control form-control-with-icon" placeholder="Digite seu CPF" required>
-                </div>
+                <x-input
+                    name="cpf"
+                    label="CPF"
+                    icon="person"
+                    placeholder="Digite seu CPF"
+                    required
+                />
 
                 <!-- Campo Senha -->
-                <div class="mb-3 position-relative">
-                    <label for="password" class="form-label">Senha</label>
-                    <i class="bi bi-lock form-icon"></i>
-                    <input type="password" id="password" name="password" class="form-control form-control-with-icon" placeholder="Digite sua senha" required>
-                </div>
+                <x-input
+                    name="password"
+                    type="password"
+                    label="Senha"
+                    icon="lock"
+                    placeholder="Digite sua senha"
+                    required
+                />
 
-                <!-- Botão -->
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-custom">Entrar</button>
                 </div>
@@ -91,7 +94,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

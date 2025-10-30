@@ -29,7 +29,9 @@
     <div class="d-flex min-vh-100">
 
             <div class="sidebar d-none d-lg-flex flex-shrink-0 border-end-0 shadow-sm overflow-auto">
-                <x-nav />
+                @auth
+                    <x-nav />
+                @endauth
             </div>
 
             <button class="btn btn-outline-primary d-lg-none position-fixed top-0 start-0 m-3 z-3 rounded-pill shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
@@ -46,7 +48,7 @@
                 </div>
             </div>
 
-            
+
            <div class="flex-grow-1 p-4">
                 @yield('content')
             </div>
