@@ -7,18 +7,10 @@ use App\Models\User;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Sanctum\PersonalAccessToken;
+
 
 class AuthController extends Controller
 {
-    function register(Request $request) {
-        $validate = $request->validate([
-            'name' => 'required|string|max:255',
-            'cpf' => 'required|string|max:11',
-            'password' => 'required|min:6|confirmed',
-        ]);
-
-    }
 
     function abrirLogin() {
         return view('auth.login');
@@ -51,11 +43,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout(); // ✅ força o logout do guard de sessão
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login'); // ✅ melhor redirecionar, em vez de retornar view
+        return redirect()->route('login');
     }
 }

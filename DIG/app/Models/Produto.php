@@ -13,8 +13,10 @@ class Produto extends Model
         return $this->belongsTo(Marca::class);
     }
 
-     public function vendas(){
-        return $this->belongsToMany(Venda::class, 'vendas_produtos');
+    public function vendas() {
+        return $this->belongsToMany(Venda::class, 'vendas_produtos', 'produto_id', 'venda_id')
+                    ->withPivot('quantidade_retirado', 'valor_total_item')
+                    ->withTimestamps()
+                    ->withSoftDeletes();
     }
-
 }

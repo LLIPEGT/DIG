@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('vendas_produtos', function (Blueprint $table) {
             $table->unsignedBigInteger('venda_id');
             $table->foreign('venda_id')->references('id')->on('vendas')->onDelete('cascade');
-            
             $table->unsignedBigInteger('produto_id');
             $table->foreign('produto_id')->references('id')->on('produtos')->onDelete('cascade');
+            $table->double('quantidade_retirado');
+            $table->double('valor_total_item');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -13,10 +13,10 @@ Route::get('/login', [AuthController::class, 'abrirLogin'])->name('login')->midd
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
 
-Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth:sanctum');
-Route::prefix('api')->group(function () {
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(['auth:sanctum', 'checkuser']);
 
-    Route::resource('/user', UserController::class)->names([
+
+Route::resource('/user', UserController::class)->names([
         'index'   => 'usuario.index',
         'create'  => 'usuario.create',
         'store'   => 'usuario.store',
@@ -24,31 +24,19 @@ Route::prefix('api')->group(function () {
         'edit'    => 'usuario.edit',
         'update'  => 'usuario.update',
         'destroy' => 'usuario.destroy',
-    ]);
+])->middleware('auth:sanctum');
 
-    Route::resource('/marca', MarcaController::class)->names([
-        'index'   => 'marca.index',
-        'create'  => 'marca.create',
-        'store'   => 'marca.store',
-        'show'    => 'marca.show',
-        'edit'    => 'marca.edit',
-        'update'  => 'marca.update',
-        'destroy' => 'marca.destroy',
-    ]);
+Route::resource('/marca', MarcaController::class)->middleware('auth:sanctum');
 
-    Route::resource('/venda', VendaController::class);
+Route::resource('/venda', VendaController::class)->middleware('auth:sanctum');
+Route::put('/venda/{id}/confirmar', [VendaController::class, 'confirmar'])->name('venda.confirmar')->middleware('auth:sanctum');
 
-    Route::resource('/produto', ProdutoController::class)->names([
-        'index'   => 'produto.index',
-        'create'  => 'produto.create',
-        'store'   => 'produto.store',
-        'show'    => 'produto.show',
-        'edit'    => 'produto.edit',
-        'update'  => 'produto.update',
-        'destroy' => 'produto.destroy',
-    ]);
+Route::resource('/produto', ProdutoController::class)->middleware('auth:sanctum');
 
-    Route::resource('/carrinho', CarrinhodeComprasController::class);
+Route::prefix('carrinho')->group(function () {
+    Route::get('/{id}', [CarrinhodeComprasController::class, 'show'])->name('carrinho.show')->middleware('auth:sanctum');
+    Route::post('/{id}/adicionar', [CarrinhodeComprasController::class, 'adicionarItens'])->name('carrinho.adicionar')->middleware('auth:sanctum');
+    Route::put('/{id}/atualizar', [CarrinhodeComprasController::class, 'atualizarQuantidade'])->name('carrinho.atualizar')->middleware('auth:sanctum');
+});
 
-})->middleware(['auth:sanctum', 'CheckUser']);
 

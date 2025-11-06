@@ -13,17 +13,9 @@ class VendaController extends Controller
      */
     public function index()
     {
-        $venda = Venda::with('user')->get();
+        $data = Venda::with('user', 'produtos')->get();
 
-        return $venda;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view('venda.index', compact('data'));
     }
 
     /**
@@ -31,23 +23,15 @@ class VendaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'quantidade_total' => 'required|numeric|min:0', // Garante que a quantidade seja válida
-        ]);
 
-
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Usuário não autenticado'], 401); // Retorna erro se o usuário não estiver autenticado
-        }
 
         $venda = new Venda();
 
         if (isset($venda)){
             $venda->user_id = Auth::user()->id;
-            $venda->quantidade_total = $request->quantidade_total;
             $venda->save();
 
-            return 'Venda criada';
+            return redirect()->route('carrinho.show', $venda);;
         }
         return 'Error';
     }
@@ -57,11 +41,10 @@ class VendaController extends Controller
      */
     public function show(string $id)
     {
-        $venda = Venda::find($id);
+        $venda = Venda::with('user', 'produtos')->find($id);
 
-        if(isset($venda)) return $venda;
 
-        return 'Error';
+        return view('venda.show', compact('venda'));
     }
 
     /**
@@ -80,11 +63,10 @@ class VendaController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+    public function confirmar($id) {
+        $venda = Venda::findOrFail($id);
+
+        return null;
     }
+
 }
