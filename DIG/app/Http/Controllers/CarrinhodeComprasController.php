@@ -30,6 +30,11 @@ class CarrinhodeComprasController extends Controller
         ]);
 
         $carrinho = Venda::findOrFail($id);
+
+        // Prevent modifying a venda that is already paid
+        if ($carrinho->status === 'pago') {
+            return view('errors.custom', ['message' => 'Esta venda já foi paga e não pode ser alterada.']);
+        }
         $produto = Produto::findOrFail($request->produto_id);
         $quantidade = $request->quantidade;
 
@@ -86,6 +91,11 @@ class CarrinhodeComprasController extends Controller
         ]);
 
         $carrinho = Venda::findOrFail($id);
+
+        // Prevent modifying a venda that is already paid
+        if ($carrinho->status === 'pago') {
+            return view('errors.custom', ['message' => 'Esta venda já foi paga e não pode ser alterada.']);
+        }
         $produto = Produto::findOrFail($request->produto_id);
         $novaQuantidade = $request->quantidade_retirado;
 

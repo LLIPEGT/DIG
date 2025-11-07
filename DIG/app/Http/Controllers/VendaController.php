@@ -20,17 +20,24 @@ class VendaController extends Controller
         return view('venda.index', compact('data'));
     }
 
-    public function report()
+    public function report(Request $request)
     {
-        $vendas = Venda::with('user','produtos')->get();
-        // if barryvdh/laravel-dompdf is available, use PDF facade
-        if (class_exists(\Barryvdh\DomPDF\Facade::class)) {
-            $pdf = PDF::loadView('venda.report', compact('vendas'));
-            return $pdf->download('relatorio-vendas.pdf');
+        $query = Venda::with('user', 'produtos')->where('status', 'pago');
+
+        // Filtrar por data
+        if ($request->has('data')) {
+            $data = $request->data;
+            $query->whereDate('created_at', $data);
         }
 
-        // fallback to html view
-        return view('venda.report', compact('vendas'));
+        $vendas = $query->get();
+
+        // Calcular totais
+        $totalVendas = $vendas->count();
+        $valorTotal = $vendas->sum('valor_total');
+        $quantidadeTotal = $vendas->sum('quantidade_total');
+
+        return view('venda.report', compact('vendas', 'totalVendas', 'valorTotal', 'quantidadeTotal'));
     }
 
     /**
@@ -65,8 +72,15 @@ class VendaController extends Controller
     {
         $venda = Venda::with('user', 'produtos')->find($id);
 
+        if (!$venda) {
+            return view('errors.custom', ['message' => 'Venda não encontrada.']);
+        }
 
-        return view('venda.show', compact('venda'));
+        // Reuse the carrinho view to display a single venda (carrinho)
+        $produtos = \App\Models\Produto::all();
+        $carrinho = $venda;
+
+        return view('carrinho.show', compact('carrinho', 'produtos'));
     }
 
     /**
@@ -130,4 +144,122 @@ class VendaController extends Controller
         ]);
     }
 
+    public function confirmarManual(Request $request, $id)
+    {
+        $venda = Venda::with('produtos')->findOrFail($id);
+
+        if ($venda->produtos->isEmpty()) {
+            return view('errors.custom', ['message' => 'Carrinho vazio. Adicione produtos antes de confirmar a venda.']);
+        }
+
+        // Registra a forma de pagamento
+        $venda->forma_pagamento = $request->forma_pagamento;
+        $venda->status = 'pago';
+        $venda->save();
+
+        // Redireciona para a lista de vendas
+        return redirect()->route('venda.index')->with('success', 'Venda finalizada com sucesso!');
+    }
+
+    /**
+     * Generate a PDF invoice for a venda
+     */
+    public function pdf($id)
+    {
+        $venda = Venda::with('user', 'produtos')->find($id);
+
+        if (!$venda) {
+            return view('errors.custom', ['message' => 'Venda não encontrada.']);
+        }
+
+        // Only allow PDF generation for paid vendas
+        if ($venda->status !== 'pago') {
+            return view('errors.custom', ['message' => 'PDF disponível apenas para vendas já pagas.']);
+        }
+
+        $data = ['venda' => $venda];
+
+        // Render pdf from view 'venda.pdf'
+        try {
+            $pdf = PDF::loadView('venda.pdf', $data)->setPaper('a4', 'portrait');
+            return $pdf->stream('venda-' . $venda->id . '.pdf');
+        } catch (\Exception $e) {
+            // If PDF generation fails, fall back to a rendered HTML view
+            return view('venda.pdf', $data)->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Webhook endpoint to receive payment notifications from provider.
+     * Expected: JSON payload containing either `venda_id` or `reference` (txid), and `status` and optional `forma_pagamento`.
+     * Secured by HMAC signature using PAYMENT_WEBHOOK_SECRET env var. Provider must send header 'X-Signature'.
+     */
+    public function webhook(Request $request)
+    {
+        $secret = env('PAYMENT_WEBHOOK_SECRET');
+
+        $payload = $request->getContent();
+        $signature = $request->header('X-Signature') ?? $request->header('X-PAYMENT-SIGNATURE');
+
+        // If secret configured, verify signature
+        if ($secret) {
+            if (!$signature) {
+                return response()->json(['error' => 'Missing signature'], 400);
+            }
+
+            $calculated = hash_hmac('sha256', $payload, $secret);
+            if (!hash_equals($calculated, $signature)) {
+                return response()->json(['error' => 'Invalid signature'], 403);
+            }
+        }
+
+        $data = json_decode($payload, true);
+        if (!$data) {
+            return response()->json(['error' => 'Invalid JSON'], 400);
+        }
+
+        // Try to find venda by explicit id, or by txid/reference
+        $venda = null;
+        if (!empty($data['venda_id'])) {
+            $venda = Venda::find($data['venda_id']);
+        }
+        if (!$venda && !empty($data['reference'])) {
+            // reference may be stored in a coluna txid (not present currently) - try match
+            $venda = Venda::where('txid', $data['reference'])->first();
+        }
+
+        // If provider gives amount and we need to map, optionally try to find by amount+user
+
+        if (!$venda) {
+            return response()->json(['error' => 'Venda not found'], 404);
+        }
+
+        // Update status and payment method according to payload
+        if (!empty($data['status']) && $data['status'] === 'paid') {
+            $venda->status = 'pago';
+            if (!empty($data['forma_pagamento'])) {
+                $venda->forma_pagamento = $data['forma_pagamento'];
+            }
+            if (!empty($data['reference'])) {
+                // Save provider transaction id if model has txid column
+                try {
+                    $venda->txid = $data['reference'];
+                } catch (\Throwable $e) {
+                    // ignore if column doesn't exist
+                }
+            }
+            $venda->save();
+
+            return response()->json(['ok' => true], 200);
+        }
+
+        // handle other statuses (failed, pending)
+        if (!empty($data['status'])) {
+            $venda->status = $data['status'];
+            $venda->save();
+            return response()->json(['ok' => true], 200);
+        }
+
+        return response()->json(['error' => 'Nothing to update'], 400);
+    }
 }

@@ -7,6 +7,7 @@
     <p><strong>Cliente:</strong> {{ $carrinho->user->name }}</p>
     <hr>
 
+    @if($carrinho->status !== 'pago')
     <form id="form-adicionar"
           action="{{ route('carrinho.adicionar', $carrinho->id) }}"
           class="d-flex gap-2 align-items-center"
@@ -17,7 +18,7 @@
             <option value="">Selecione um produto</option>
             @foreach($produtos as $produto)
                 <option value="{{ $produto->id }}" data-venda-type="{{ $produto->venda_tipo ?? 'unit' }}">
-                    {{ $produto->nome }} — R$ {{ number_format($produto->preco, 2, ',', '.') }} @if(isset($produto->venda_tipo) && $produto->venda_tipo === 'kg') (kg) @endif
+                    {{ $produto->nome }} — R$ {{ number_format(($produto->venda_tipo === 'kg' ? $produto->preco_kg : $produto->preco), 2, ',', '.') }} {{ $produto->venda_tipo === 'kg' ? '/kg' : '/un' }}
                 </option>
             @endforeach
         </select>
@@ -31,6 +32,9 @@
             :label="'Adicionar'"
         />
     </form>
+    @else
+        <div class="alert alert-success">Esta venda já foi paga. Edição desabilitada.</div>
+    @endif
 
     <table id="tabela-produtos" class="table table-bordered mt-4 align-middle">
         <thead class="table-light">
@@ -45,8 +49,9 @@
             @foreach($carrinho->produtos as $produto)
                 <tr data-id="{{ $produto->id }}">
                     <td>{{ $produto->nome }}</td>
-                    <td>R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
+                    <td>R$ {{ number_format(($produto->venda_tipo === 'kg' ? $produto->preco_kg : $produto->preco), 2, ',', '.') }} {{ $produto->venda_tipo === 'kg' ? '/kg' : '/un' }}</td>
                     <td>
+                        @if($carrinho->status !== 'pago')
                         <form action="{{ route('carrinho.atualizar', $carrinho->id) }}"
                               method="POST"
                               class="d-flex gap-2 align-items-center">
@@ -65,6 +70,9 @@
                                 :label="'Atualizar'"
                             />
                         </form>
+                        @else
+                            <span class="text-muted">Venda paga</span>
+                        @endif
                     </td>
                     <td>R$ {{ number_format($produto->pivot->valor_total_item, 2, ',', '.') }}</td>
                 </tr>
@@ -104,16 +112,22 @@
         });
     </script>
 
-    <form action="{{ route('venda.confirmar', $carrinho->id) }}" method="POST" class="mt-3">
-        @csrf
-        @method('PUT')
-        <x-button
-            type="submit"
-            color="success"
-            :label="'Confirmar Venda'"
-        />
-    </form>
+    <div class="mt-3">
+        @if($carrinho->status !== 'pago')
+            <form action="{{ route('venda.confirmar', $carrinho->id) }}" method="POST" class="d-inline">
+                @csrf
+                @method('PUT')
+                <x-button
+                    type="submit"
+                    color="success"
+                    :label="'Confirmar Venda'"
+                />
+            </form>
+        @else
+            <a href="{{ route('venda.pdf', $carrinho->id) }}" target="_blank" class="btn btn-secondary">Baixar PDF</a>
+        @endif
 
-    <a href="{{ route('venda.index') }}" class="btn btn-outline-secondary mt-3">Voltar às Vendas</a>
+        <a href="{{ route('venda.index') }}" class="btn btn-outline-secondary ms-2">Voltar às Vendas</a>
+    </div>
 </div>
 @endsection

@@ -17,19 +17,22 @@
                                 placeholder="Nome do produto"
                             />
 
-                            <x-input
-                                name="preco"
-                                label="Preço"
-                                type="number"
-                                placeholder="Valor do produto"
-                            />
-
                             <div class="mb-3">
                                 <label class="form-label">Tipo de venda</label>
                                 <select name="venda_tipo" id="venda_tipo" class="form-select">
                                     <option value="unit">Unidade</option>
                                     <option value="kg">Por Quilo (kg)</option>
                                 </select>
+                            </div>
+
+                            <div class="mb-3" id="preco_unit_group">
+                                <x-input
+                                    name="preco"
+                                    label="Preço por unidade"
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Valor por unidade"
+                                />
                             </div>
 
                             <div class="mb-3" id="preco_kg_group" style="display:none;">
@@ -45,10 +48,25 @@
                             <script>
                                 document.addEventListener('DOMContentLoaded', function () {
                                     const sel = document.getElementById('venda_tipo');
-                                    const grp = document.getElementById('preco_kg_group');
-                                    sel.addEventListener('change', function () {
-                                        if (sel.value === 'kg') grp.style.display = 'block'; else grp.style.display = 'none';
-                                    });
+                                    const kgGroup = document.getElementById('preco_kg_group');
+                                    const unitGroup = document.getElementById('preco_unit_group');
+
+                                    function updatePriceFields() {
+                                        if (sel.value === 'kg') {
+                                            kgGroup.style.display = 'block';
+                                            unitGroup.style.display = 'none';
+                                            kgGroup.querySelector('input').required = true;
+                                            unitGroup.querySelector('input').required = false;
+                                        } else {
+                                            kgGroup.style.display = 'none';
+                                            unitGroup.style.display = 'block';
+                                            kgGroup.querySelector('input').required = false;
+                                            unitGroup.querySelector('input').required = true;
+                                        }
+                                    }
+
+                                    sel.addEventListener('change', updatePriceFields);
+                                    updatePriceFields(); // Run on initial load
                                 });
                             </script>
 

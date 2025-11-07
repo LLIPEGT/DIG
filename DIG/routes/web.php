@@ -28,9 +28,16 @@ Route::resource('/user', UserController::class)->names([
 
 Route::resource('/marca', MarcaController::class)->middleware('auth:sanctum');
 
-Route::resource('/venda', VendaController::class)->middleware('auth:sanctum');
-Route::put('/venda/{id}/confirmar', [VendaController::class, 'confirmar'])->name('venda.confirmar')->middleware('auth:sanctum');
+// Custom venda routes (place before resource to avoid conflicting with resource parameter)
 Route::get('/venda/report', [VendaController::class, 'report'])->name('venda.report')->middleware('auth:sanctum');
+Route::put('/venda/{id}/confirmar', [VendaController::class, 'confirmar'])->name('venda.confirmar')->middleware('auth:sanctum');
+Route::post('/venda/{id}/confirmar-manual', [VendaController::class, 'confirmarManual'])->name('venda.confirmar.manual')->middleware('auth:sanctum');
+// PDF export for a single venda
+Route::get('/venda/{id}/pdf', [VendaController::class, 'pdf'])->name('venda.pdf')->middleware('auth:sanctum');
+// Payment webhook (no auth - should be secured via signature)
+Route::post('/venda/webhook', [VendaController::class, 'webhook'])->name('venda.webhook');
+
+Route::resource('/venda', VendaController::class)->middleware('auth:sanctum');
 
 Route::resource('/produto', ProdutoController::class)->middleware('auth:sanctum');
 

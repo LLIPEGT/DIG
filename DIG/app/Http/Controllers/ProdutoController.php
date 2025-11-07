@@ -41,10 +41,16 @@ class ProdutoController extends Controller
         if(isset($produto)){
             $produto->nome = $request->nome;
             $produto->venda_tipo = $request->venda_tipo ?? 'unit';
-            // preco é o preco unitário
-            $produto->preco = $request->preco;
-            // preco por kg, se aplicável
-            $produto->preco_kg = $request->preco_kg ?? null;
+
+            // Define os preços baseado no tipo de venda
+            if ($request->venda_tipo === 'kg') {
+                $produto->preco = null;
+                $produto->preco_kg = $request->preco_kg;
+            } else {
+                $produto->preco = $request->preco;
+                $produto->preco_kg = null;
+            }
+
             $produto->quantidade_estoque = $request->quantidade_estoque;
             $produto->marca_id = $request->marca_id;
             $produto->save();
@@ -88,8 +94,16 @@ class ProdutoController extends Controller
         if (isset($produto)) {
             $produto->nome = $request->nome;
             $produto->venda_tipo = $request->venda_tipo ?? $produto->venda_tipo;
-            $produto->preco = $request->preco;
-            $produto->preco_kg = $request->preco_kg ?? $produto->preco_kg;
+
+            // Define os preços baseado no tipo de venda
+            if ($produto->venda_tipo === 'kg') {
+                $produto->preco_kg = $request->preco_kg;
+                $produto->preco = null; // Zera o preço unitário
+            } else {
+                $produto->preco = $request->preco;
+                $produto->preco_kg = null; // Zera o preço por kg
+            }
+
             $produto->quantidade_estoque = $request->quantidade_estoque;
             $produto->marca_id = $request->marca_id;
             $produto->save();
