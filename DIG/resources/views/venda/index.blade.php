@@ -2,9 +2,15 @@
 
 
 @section('content')
-        <div class="d-flex justify-content-end gap-2 mt-3">
-            <form action="{{ route('venda.store') }}" method="POST">
+        <div class="d-flex justify-content-between gap-2 mt-3">
+            <form action="{{ route('venda.store') }}" method="POST" class="d-flex gap-2">
                 @csrf
+                <select name="cliente_id" class="form-select" required>
+                    <option value="">Selecione o Cliente</option>
+                    @foreach(\App\Models\User::where('id', '!=', auth()->id())->get() as $cliente)
+                        <option value="{{ $cliente->id }}">{{ $cliente->name }}</option>
+                    @endforeach
+                </select>
                 <button type="submit" class="btn btn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFFF" class="bi bi-plus-circle" viewBox="0 0 16 16">
                         <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>

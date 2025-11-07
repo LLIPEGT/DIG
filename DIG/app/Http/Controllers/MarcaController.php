@@ -20,7 +20,7 @@ class MarcaController extends Controller
         if(Auth::check() && Auth::user()){
             return view("marca.index", compact('data'));
         }
-        return "ERROR";
+        return view('errors.custom', ['message' => 'Usuário não autenticado para visualizar marcas.']);
 
     }
 
@@ -33,7 +33,7 @@ class MarcaController extends Controller
 
         if(isset($marca)) return view('marca.create', compact('marca'));
 
-        return "ERROR";
+        return view('errors.custom', ['message' => 'Erro ao preparar criação de marca.']);
     }
 
     /**
@@ -49,7 +49,7 @@ class MarcaController extends Controller
             return redirect()->route('marca.index');
         }
 
-        return 'error';
+        return view('errors.custom', ['message' => 'Erro ao salvar marca.']);
     }
 
     /**
@@ -61,7 +61,7 @@ class MarcaController extends Controller
 
         if(isset($marca)) return view('marca.show', compact('marca'));
 
-        return "Error";
+        return view('errors.custom', ['message' => 'Marca não encontrada.']);
     }
 
     /**
@@ -74,7 +74,7 @@ class MarcaController extends Controller
 
         if(isset($marca)) return view('marca.edit', compact('marca'));
 
-        return "ERROR";
+        return view('errors.custom', ['message' => 'Marca não encontrada para edição.']);
     }
 
     /**
@@ -89,7 +89,7 @@ class MarcaController extends Controller
             $marca->save();
             return redirect()->route('marca.index');
         }
-        return 'Error';
+        return view('errors.custom', ['message' => 'Falha ao atualizar marca.']);
     }
 
     /**
@@ -101,6 +101,6 @@ class MarcaController extends Controller
 
         if($marca->delete()) return redirect()->route('marca.index');
 
-        return 'Error';
+        return view('errors.custom', ['message' => 'Erro ao excluir marca.']);
     }
 }

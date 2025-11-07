@@ -9,6 +9,12 @@ class Venda extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'user_id',
+        'valor_total',
+        'quantidade_total'
+    ];
+
     public function user(){
         return $this->belongsTo(User::class);
     }
@@ -17,6 +23,5 @@ class Venda extends Model
         return $this->belongsToMany(Produto::class, 'vendas_produtos', 'venda_id', 'produto_id')
                     ->withPivot('quantidade_retirado', 'valor_total_item')
                     ->withTimestamps();
-
     }
 }

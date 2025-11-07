@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -17,13 +17,25 @@ class AuthController extends Controller
     }
 
     function login(Request $request) {
-        $validated = $request->validate([
-            'cpf' => 'required|string',
+        // accept either cpf or email as login identifier
+        $request->validate([
             'password' => 'required',
         ]);
 
-        if(Auth::attempt($validated)) {
-            $user = User::where('cpf', $validated['cpf'])->first();
+        $identifier = $request->input('cpf') ?? $request->input('email') ?? $request->input('login');
+        if (!$identifier) {
+            return view('errors.custom', ['message' => 'Informe CPF ou email para efetuar o login.']);
+        }
+
+        $credentials = [];
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $credentials['email'] = $identifier;
+        } else {
+            $credentials['cpf'] = $identifier;
+        }
+        $credentials['password'] = $request->password;
+
+        if (Auth::attempt($credentials)) {
             $user = Auth::user();
            /*return response()->json([
             'ok'    => true,
@@ -38,7 +50,7 @@ class AuthController extends Controller
            return view('home.index', compact('user'));
         }
 
-        return "error 1";
+        return view('errors.custom', ['message' => 'Credenciais inválidas.']);
     }
 
     public function logout(Request $request)

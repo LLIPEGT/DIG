@@ -30,6 +30,35 @@
                             :value="old('preco', $produto->preco)"
                         />
 
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de venda</label>
+                            <select name="venda_tipo" id="venda_tipo" class="form-select">
+                                <option value="unit" {{ old('venda_tipo', $produto->venda_tipo ?? 'unit') === 'unit' ? 'selected' : '' }}>Unidade</option>
+                                <option value="kg" {{ old('venda_tipo', $produto->venda_tipo ?? 'unit') === 'kg' ? 'selected' : '' }}>Por Quilo (kg)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="preco_kg_group" style="display: none;">
+                            <x-input
+                                name="preco_kg"
+                                label="Preço por kg"
+                                type="number"
+                                step="0.01"
+                                placeholder="Valor por kg"
+                                :value="old('preco_kg', $produto->preco_kg)"
+                            />
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const sel = document.getElementById('venda_tipo');
+                                const grp = document.getElementById('preco_kg_group');
+                                function toggle(){ if (sel.value === 'kg') grp.style.display = 'block'; else grp.style.display = 'none'; }
+                                sel.addEventListener('change', toggle);
+                                toggle();
+                            });
+                        </script>
+
                         <x-input
                             name="quantidade_estoque"
                             label="Quantidade"

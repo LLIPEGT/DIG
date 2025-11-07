@@ -55,7 +55,7 @@ class UserController extends Controller
 
             return redirect()->route('usuario.index');
         }
-        return "Error";
+        return view('errors.custom', ['message' => 'Erro ao salvar usuário.']);
     }
 
     /**
@@ -67,7 +67,7 @@ class UserController extends Controller
 
         if (isset($user))  return view('usuario.show', compact('user'));;
 
-        return "ERROR";
+        return view('errors.custom', ['message' => 'Usuário não encontrado.']);
     }
 
     /**
@@ -81,8 +81,7 @@ class UserController extends Controller
         if(isset($user)){
             return view('usuario.edit', compact('user'));
         }
-
-        return "error";
+        return view('errors.custom', ['message' => 'Usuário não encontrado para edição.']);
     }
 
     /**
@@ -101,7 +100,7 @@ class UserController extends Controller
             return redirect()->route('usuario.index');
         }
 
-        return 'Error';
+        return view('errors.custom', ['message' => 'Erro ao atualizar usuário.']);
     }
 
     /**
@@ -111,9 +110,9 @@ class UserController extends Controller
     {
         $data = User::find($id);
 
-        if($data->delete())
-              return redirect()->route('usuario.index');
+      if($data->delete())
+          return redirect()->route('usuario.index');
 
-        return 'Error';
+      return view('errors.custom', ['message' => 'Erro ao excluir usuário.']);
     }
 }

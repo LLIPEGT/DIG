@@ -13,17 +13,17 @@
           method="POST">
         @csrf
 
-        <select name="produto_id" class="form-select w-50" required>
+        <select name="produto_id" id="produto_select" class="form-select w-50" required>
             <option value="">Selecione um produto</option>
             @foreach($produtos as $produto)
-                <option value="{{ $produto->id }}">
-                    {{ $produto->nome }} — R$ {{ number_format($produto->preco, 2, ',', '.') }}
+                <option value="{{ $produto->id }}" data-venda-type="{{ $produto->venda_tipo ?? 'unit' }}">
+                    {{ $produto->nome }} — R$ {{ number_format($produto->preco, 2, ',', '.') }} @if(isset($produto->venda_tipo) && $produto->venda_tipo === 'kg') (kg) @endif
                 </option>
             @endforeach
         </select>
 
-        <input type="number" name="quantidade" class="form-control w-25"
-               placeholder="Qtd" min="1" required>
+        <input type="number" name="quantidade" id="quantidade_input" class="form-control w-25"
+               placeholder="Qtd" min="1" step="1" required>
 
         <x-button
             type="submit"
@@ -53,10 +53,12 @@
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="produto_id" value="{{ $produto->id }}">
-                            <input type="number" name="quantidade_retirado"
-                                   value="{{ $produto->pivot->quantidade_retirado }}"
-                                   min="0"
-                                   class="form-control form-control-sm w-50">
+                <input type="number" name="quantidade_retirado"
+                    value="{{ $produto->pivot->quantidade_retirado }}"
+                    min="0"
+                    step="{{ $produto->venda_tipo === 'kg' ? '0.01' : '1' }}"
+                    class="form-control form-control-sm w-50">
+                <span class="ms-2">{{ $produto->venda_tipo === 'kg' ? 'kg' : 'un' }}</span>
                             <x-button
                                 type="submit"
                                 color="secondary"
@@ -76,6 +78,31 @@
             </tr>
         </tfoot>
     </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const select = document.getElementById('produto_select');
+            const qty = document.getElementById('quantidade_input');
+
+            function updateStep() {
+                const opt = select.options[select.selectedIndex];
+                if (!opt || !opt.dataset) return;
+                const vendaType = opt.dataset.vendaType || 'unit';
+                if (vendaType === 'kg') {
+                    qty.step = '0.01';
+                    qty.min = '0.01';
+                    qty.placeholder = 'Kg (ex: 0.25)';
+                } else {
+                    qty.step = '1';
+                    qty.min = '1';
+                    qty.placeholder = 'Qtd (unidades)';
+                }
+            }
+
+            select && select.addEventListener('change', updateStep);
+            updateStep();
+        });
+    </script>
 
     <form action="{{ route('venda.confirmar', $carrinho->id) }}" method="POST" class="mt-3">
         @csrf

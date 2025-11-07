@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\CarrinhodeComprasController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarcaController;
@@ -30,6 +30,7 @@ Route::resource('/marca', MarcaController::class)->middleware('auth:sanctum');
 
 Route::resource('/venda', VendaController::class)->middleware('auth:sanctum');
 Route::put('/venda/{id}/confirmar', [VendaController::class, 'confirmar'])->name('venda.confirmar')->middleware('auth:sanctum');
+Route::get('/venda/report', [VendaController::class, 'report'])->name('venda.report')->middleware('auth:sanctum');
 
 Route::resource('/produto', ProdutoController::class)->middleware('auth:sanctum');
 

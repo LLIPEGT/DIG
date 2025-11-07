@@ -13,7 +13,7 @@ class CarrinhodeComprasController extends Controller
         $carrinho = Venda::with('produtos', 'user')->find($id);
 
         if (!$carrinho) {
-            return response()->json(['error' => 'Carrinho não encontrado']);
+            return view('errors.custom', ['message' => 'Carrinho não encontrado.']);
         }
 
         $produtos = Produto::all();
@@ -35,18 +35,38 @@ class CarrinhodeComprasController extends Controller
 
         $produtoExistente = $carrinho->produtos()->where('produto_id', $produto->id)->first();
 
-        $valorTotalItem = $produto->preco * $quantidade;
+        if (isset($produto->venda_tipo) && $produto->venda_tipo === 'kg') {
+            $price = $produto->preco_kg ?? $produto->preco;
+        } else {
+            $price = $produto->preco;
+        }
+
+        $valorTotalItem = $price * $quantidade;
 
         if ($produtoExistente) {
             $quantidadeAtual = $produtoExistente->pivot->quantidade_retirado;
             $novaQuantidade = $quantidadeAtual + $quantidade;
-            $novoValorTotalItem = $produto->preco * $novaQuantidade;
+            // valida estoque: não permitir adicionar mais do que o disponível
+            if ($novaQuantidade > $produto->quantidade_estoque) {
+                return view('errors.custom', ['message' => "Estoque insuficiente para o produto {$produto->nome}. Disponível: {$produto->quantidade_estoque}."]);
+            }
+            if (isset($produto->venda_tipo) && $produto->venda_tipo === 'kg') {
+                $price = $produto->preco_kg ?? $produto->preco;
+            } else {
+                $price = $produto->preco;
+            }
+            $novoValorTotalItem = $price * $novaQuantidade;
 
             $carrinho->produtos()->updateExistingPivot($produto->id, [
                 'quantidade_retirado' => $novaQuantidade,
                 'valor_total_item' => $novoValorTotalItem,
             ]);
         } else {
+            // valida estoque ao adicionar novo item
+            if ($quantidade > $produto->quantidade_estoque) {
+                return view('errors.custom', ['message' => "Estoque insuficiente para o produto {$produto->nome}. Disponível: {$produto->quantidade_estoque}."]);
+            }
+
             $carrinho->produtos()->attach($produto->id, [
                 'quantidade_retirado' => $quantidade,
                 'valor_total_item' => $valorTotalItem,
@@ -72,7 +92,16 @@ class CarrinhodeComprasController extends Controller
         if ($novaQuantidade == 0) {
             $carrinho->produtos()->detach($produto->id);
         } else {
-            $novoValorTotalItem = $produto->preco * $novaQuantidade;
+            // valida estoque ao atualizar quantidade
+            if ($novaQuantidade > $produto->quantidade_estoque) {
+                return view('errors.custom', ['message' => "Estoque insuficiente para o produto {$produto->nome}. Disponível: {$produto->quantidade_estoque}."]);
+            }
+            if (isset($produto->venda_tipo) && $produto->venda_tipo === 'kg') {
+                $price = $produto->preco_kg ?? $produto->preco;
+            } else {
+                $price = $produto->preco;
+            }
+            $novoValorTotalItem = $price * $novaQuantidade;
 
             $carrinho->produtos()->updateExistingPivot($produto->id, [
                 'quantidade_retirado' => $novaQuantidade,
@@ -88,12 +117,15 @@ class CarrinhodeComprasController extends Controller
     private function atualizarValorTotal(Venda $carrinho)
     {
         $total = 0;
+        $quantidadeTotal = 0;
 
         foreach ($carrinho->produtos as $produto) {
             $total += $produto->pivot->valor_total_item;
+            $quantidadeTotal += $produto->pivot->quantidade_retirado;
         }
 
         $carrinho->valor_total = $total;
+        $carrinho->quantidade_total = $quantidadeTotal;
         $carrinho->save();
     }
 }

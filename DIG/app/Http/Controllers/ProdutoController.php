@@ -29,7 +29,7 @@ class ProdutoController extends Controller
 
         if (isset($produto)) return view('produto.create', compact("produto", "marca"));
 
-        return "Error";
+        return view('errors.custom', ['message' => 'Erro ao preparar formulário de criação de produto.']);
     }
 
     /**
@@ -38,16 +38,20 @@ class ProdutoController extends Controller
     public function store(Request $request)
     {
         $produto = new Produto();
-
         if(isset($produto)){
             $produto->nome = $request->nome;
+            $produto->venda_tipo = $request->venda_tipo ?? 'unit';
+            // preco é o preco unitário
             $produto->preco = $request->preco;
+            // preco por kg, se aplicável
+            $produto->preco_kg = $request->preco_kg ?? null;
             $produto->quantidade_estoque = $request->quantidade_estoque;
             $produto->marca_id = $request->marca_id;
             $produto->save();
             return redirect()->route('produto.index');
         }
-        return "Error";
+
+        return view('errors.custom', ['message' => 'Erro ao salvar produto. Verifique os dados e tente novamente.']);
     }
 
     /**
@@ -58,7 +62,7 @@ class ProdutoController extends Controller
         $produto = Produto::find($id);
         if(isset($produto)) return view('produto.show', compact('produto'));
 
-        return 'Error';
+        return view('errors.custom', ['message' => 'Produto não encontrado.']);
     }
 
     /**
@@ -71,7 +75,7 @@ class ProdutoController extends Controller
 
         if(isset($produto)) return view('produto.edit', compact('produto', 'marca'));
 
-        return "ERROR";
+        return view('errors.custom', ['message' => 'Produto não encontrado para edição.']);
     }
 
     /**
@@ -83,14 +87,16 @@ class ProdutoController extends Controller
 
         if (isset($produto)) {
             $produto->nome = $request->nome;
+            $produto->venda_tipo = $request->venda_tipo ?? $produto->venda_tipo;
             $produto->preco = $request->preco;
+            $produto->preco_kg = $request->preco_kg ?? $produto->preco_kg;
             $produto->quantidade_estoque = $request->quantidade_estoque;
             $produto->marca_id = $request->marca_id;
             $produto->save();
             return redirect()->route('produto.index');
         }
 
-        return 'Error';
+        return view('errors.custom', ['message' => 'Falha ao atualizar produto.']);
     }
 
     /**
@@ -102,6 +108,6 @@ class ProdutoController extends Controller
 
         if($produto->delete()) return redirect()->route('produto.index');
 
-        return 'Error';
+        return view('errors.custom', ['message' => 'Erro ao excluir produto.']);
     }
 }
