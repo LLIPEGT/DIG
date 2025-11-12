@@ -21,7 +21,13 @@
 
         .offcanvas {
             transition: transform 0.3s ease-in-out;
+
         }
+
+        #mobileSidebar {
+    width: 270px; /* diminui de 300px para 220px, ajuste conforme desejar */
+    }
+
     </style>
 </head>
 <body>
@@ -41,7 +47,7 @@
                 <div class="offcanvas-header p-3 border-bottom-0">
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
-                <div class="offcanvas-body p-0">
+                <div class="offcanvas-body p-3">
                     <x-nav class="p-3" />
                 </div>
             </div>

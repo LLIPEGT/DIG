@@ -110,7 +110,6 @@ class VendaController extends Controller
             return view('errors.custom', ['message' => 'Carrinho vazio. Adicione produtos antes de confirmar a venda.']);
         }
 
-        // Calcula o total da venda
         $amount = 0;
         foreach ($venda->produtos as $produto) {
             if (isset($produto->venda_tipo) && $produto->venda_tipo === 'kg') {
@@ -123,7 +122,6 @@ class VendaController extends Controller
 
         $txid = 'tx' . $venda->id . '-' . substr(sha1(now()), 0, 8);
 
-        // Verifica e atualiza o estoque
         foreach ($venda->produtos as $produto) {
             $needed = $produto->pivot->quantidade_retirado;
             if ($produto->quantidade_estoque < $needed) {
@@ -152,13 +150,12 @@ class VendaController extends Controller
             return view('errors.custom', ['message' => 'Carrinho vazio. Adicione produtos antes de confirmar a venda.']);
         }
 
-        // Registra a forma de pagamento
         $venda->forma_pagamento = $request->forma_pagamento;
         $venda->status = 'pago';
         $venda->save();
 
-        // Redireciona para a lista de vendas
-        return redirect()->route('venda.index')->with('success', 'Venda finalizada com sucesso!');
+
+        return redirect()->route('venda.liberarDispensers', $venda->id);
     }
 
     /**
@@ -172,14 +169,12 @@ class VendaController extends Controller
             return view('errors.custom', ['message' => 'Venda não encontrada.']);
         }
 
-        // Only allow PDF generation for paid vendas
         if ($venda->status !== 'pago') {
             return view('errors.custom', ['message' => 'PDF disponível apenas para vendas já pagas.']);
         }
 
         $data = ['venda' => $venda];
 
-        // Render pdf from view 'venda.pdf'
         try {
             $pdf = PDF::loadView('venda.pdf', $data)->setPaper('a4', 'portrait');
             return $pdf->stream('venda-' . $venda->id . '.pdf');
@@ -234,18 +229,16 @@ class VendaController extends Controller
             return response()->json(['error' => 'Venda not found'], 404);
         }
 
-        // Update status and payment method according to payload
         if (!empty($data['status']) && $data['status'] === 'paid') {
             $venda->status = 'pago';
             if (!empty($data['forma_pagamento'])) {
                 $venda->forma_pagamento = $data['forma_pagamento'];
             }
             if (!empty($data['reference'])) {
-                // Save provider transaction id if model has txid column
-                try {
+                                try {
                     $venda->txid = $data['reference'];
                 } catch (\Throwable $e) {
-                    // ignore if column doesn't exist
+
                 }
             }
             $venda->save();
@@ -253,7 +246,6 @@ class VendaController extends Controller
             return response()->json(['ok' => true], 200);
         }
 
-        // handle other statuses (failed, pending)
         if (!empty($data['status'])) {
             $venda->status = $data['status'];
             $venda->save();
@@ -262,4 +254,30 @@ class VendaController extends Controller
 
         return response()->json(['error' => 'Nothing to update'], 400);
     }
+
+    public function liberarDispensers($id)
+    {
+        $venda = Venda::with(['produtos.dispenser'])->findOrFail($id);
+
+        if ($venda->status !== 'pago') {
+            return view('errors.custom', ['message' => 'A venda ainda não foi paga.']);
+        }
+
+        $dispensers = $venda->produtos->filter(function ($produto) {
+            return $produto->dispenser;
+        })->map(function ($produto) {
+            return [
+                'dispenser' => $produto->dispenser,
+                'produto' => $produto,
+                'quantidade' => $produto->pivot->quantidade_retirado,
+            ];
+        });
+
+        if ($dispensers->isEmpty()) {
+            return redirect()->back()->with('info', 'Não há dispensers para liberar nesta venda.');
+        }
+
+        return view('venda.liberarDispensers', compact('venda', 'dispensers'));
+    }
+
 }

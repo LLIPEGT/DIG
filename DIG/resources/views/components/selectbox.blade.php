@@ -1,3 +1,11 @@
+@props([
+    'name',
+    'label' => '',
+    'data' => [],
+    'field' => '',
+    'select' => ''
+])
+
 <div class="mb-3">
     <label for="{{ $name }}" class="form-label">{{ $label }}</label>
     <select name="{{ $name }}" id="{{ $name }}" class="form-select @error($name) is-invalid @enderror">

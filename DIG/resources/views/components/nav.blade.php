@@ -28,6 +28,12 @@
             </a>
         </li>
         <li class="mb-2">
+            <a href="{{ route('dispensers.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
+                <i class="bi bi-cart me-2"></i>
+                Dispensers
+            </a>
+        </li>
+        <li class="mb-2">
             <a href="{{ route('venda.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
                 <i class="bi bi-cart me-2"></i>
                 Vendas
@@ -49,6 +55,6 @@
         background-color: #6c4f3d;
         color: #fff !important;
         transform: translateX(2px);
-        transition: all 0.2s ease; 
+        transition: all 0.2s ease;
     }
 </style>

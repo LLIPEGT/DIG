@@ -66,7 +66,7 @@
                                     }
 
                                     sel.addEventListener('change', updatePriceFields);
-                                    updatePriceFields(); // Run on initial load
+                                    updatePriceFields();
                                 });
                             </script>
 

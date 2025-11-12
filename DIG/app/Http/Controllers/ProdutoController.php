@@ -42,7 +42,6 @@ class ProdutoController extends Controller
             $produto->nome = $request->nome;
             $produto->venda_tipo = $request->venda_tipo ?? 'unit';
 
-            // Define os preços baseado no tipo de venda
             if ($request->venda_tipo === 'kg') {
                 $produto->preco = null;
                 $produto->preco_kg = $request->preco_kg;
@@ -95,7 +94,6 @@ class ProdutoController extends Controller
             $produto->nome = $request->nome;
             $produto->venda_tipo = $request->venda_tipo ?? $produto->venda_tipo;
 
-            // Define os preços baseado no tipo de venda
             if ($produto->venda_tipo === 'kg') {
                 $produto->preco_kg = $request->preco_kg;
                 $produto->preco = null; // Zera o preço unitário

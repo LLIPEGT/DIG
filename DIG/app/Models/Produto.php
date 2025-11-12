@@ -19,4 +19,11 @@ class Produto extends Model
                     ->withTimestamps()
                     ->withSoftDeletes();
     }
+
+    public function dispenser()
+    {
+        return $this->hasOne(\App\Models\Dispenser::class);
+    }
+
+
 }

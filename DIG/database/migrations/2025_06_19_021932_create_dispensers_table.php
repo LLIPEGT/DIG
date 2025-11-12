@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('dispensers', function (Blueprint $table) {
             $table->id();
             $table->string('nome');
-            $table->boolean('status');
-            $table->unsignedBigInteger('venda_id');
-            $table->foreign('venda_id')->references('id')->on('vendas');
+            $table->unsignedBigInteger('produto_id');
+            $table->foreign('produto_id')->references('id')->on('produtos')->onDelete('cascade');
+            $table->string('status')->default('livre');
+            $table->string('IP_micro')->nullable();
+
             $table->softDeletes();
             $table->timestamps();
         });
