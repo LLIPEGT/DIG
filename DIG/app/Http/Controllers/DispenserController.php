@@ -54,6 +54,15 @@ class DispenserController extends Controller
         return view('errors.custom', ['message' => 'Erro ao salvar dispenser. Verifique os dados e tente novamente.']);
     }
 
+    public function show(string $id)
+    {
+        $dispenser = Dispenser::find($id);
+
+        if(isset($dispenser)) return view('dispenser.show', compact('dispenser'));
+
+        return view('errors.custom', ['message' => 'Dispenser não encontrado.']);
+    }
+
     /**
      * Mostra o formulário de edição de um dispenser existente.
      */
