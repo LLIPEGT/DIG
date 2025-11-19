@@ -8,37 +8,53 @@
         </a>
     </div>
 
+    @php
+        $tipo = Auth::user()->type ?? null;
+    @endphp
+
     <ul class="nav nav-pills flex-column mb-auto">
-        <li class="mb-2">
-            <a href="{{ route('usuario.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
-                <i class="bi bi-people me-2"></i>
-                Usuários
-            </a>
-        </li>
-        <li class="mb-2">
-            <a href="{{ route('produto.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
-                <i class="bi bi-box-seam me-2"></i>
-                Produtos
-            </a>
-        </li>
-        <li class="nav-item mb-2">
-            <a href="{{ route('marca.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
-                <i class="bi bi-house me-2"></i>
-                Marcas
-            </a>
-        </li>
-        <li class="mb-2">
-            <a href="{{ route('dispensers.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
-                <i class="bi bi-cart me-2"></i>
-                Dispensers
-            </a>
-        </li>
-        <li class="mb-2">
-            <a href="{{ route('venda.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
-                <i class="bi bi-cart me-2"></i>
-                Vendas
-            </a>
-        </li>
+
+        @if($tipo === 'admin')
+            <li class="mb-2">
+                <a href="{{ route('usuario.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
+                    <i class="bi bi-people me-2"></i>
+                    Usuários
+                </a>
+            </li>
+        @endif
+
+        @if($tipo === 'admin' || $tipo === 'vendedor')
+            <li class="mb-2">
+                <a href="{{ route('produto.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
+                    <i class="bi bi-box-seam me-2"></i>
+                    Produtos
+                </a>
+            </li>
+
+            <li class="nav-item mb-2">
+                <a href="{{ route('marca.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
+                    <i class="bi bi-house me-2"></i>
+                    Marcas
+                </a>
+            </li>
+
+            <li class="mb-2">
+                <a href="{{ route('venda.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
+                    <i class="bi bi-cart me-2"></i>
+                    Vendas
+                </a>
+            </li>
+        @endif
+
+        @if($tipo === 'admin')
+            <li class="mb-2">
+                <a href="{{ route('dispensers.index') }}" class="nav-link text-dark rounded px-3 py-2 d-flex align-items-center">
+                    <i class="bi bi-cart me-2"></i>
+                    Dispensers
+                </a>
+            </li>
+        @endif
+
     </ul>
 
     <form action="{{ route('logout', Auth::user()) }}" method="POST" class="w-100">
@@ -49,6 +65,7 @@
         </button>
     </form>
 </nav>
+
 
 <style>
     .nav-link:hover {

@@ -22,7 +22,6 @@
                 </a>
             </div>
 
-            <!-- Modal de Nova Venda -->
             <div class="modal fade" id="novaVendaModal" tabindex="-1">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -37,7 +36,7 @@
                                     <input type="text" id="searchCliente" class="form-control mb-3"
                                            placeholder="Buscar cliente por nome ou CPF...">
                                     <div class="list-group" id="clientesList">
-                                        @foreach(\App\Models\User::where('id', '!=', auth()->id())->get() as $cliente)
+                                        @foreach(\App\Models\User::where('type', 'cliente')->get() as $cliente)
                                             <label class="list-group-item">
                                                 <input type="radio" name="cliente_id" value="{{ $cliente->id }}" class="form-check-input me-2">
                                                 {{ $cliente->name }} - CPF: {{ $cliente->cpf }}
@@ -79,11 +78,6 @@
                     });
                 });
             </script>
-            <a href="#" class="btn btn-warning">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFF" class="bi bi-bar-chart-fill" viewBox="0 0 16 16">
-                    <path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/>
-                </svg>
-            </a>
         </div>
         <hr>
         <table class="table text-center align-middle">

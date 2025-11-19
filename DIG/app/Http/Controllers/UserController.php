@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\View\Components\alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,7 +14,6 @@ class UserController extends Controller
     public function index()
     {
         $data = User::all();
-
         return view('usuario.index', compact('data'));
     }
 
@@ -26,8 +24,13 @@ class UserController extends Controller
     {
         $user = new User();
 
-        return view('usuario.create', compact("user"));
+        $tipos = [
+        (object) ['id' => 'cliente', 'label' => 'Cliente'],
+        (object) ['id' => 'vendedor', 'label' => 'Vendedor'],
+        (object) ['id' => 'admin', 'label' => 'Administrador'],
+    ];
 
+        return view('usuario.create', compact("user", 'tipos'));
     }
 
     /**
@@ -36,26 +39,24 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'cpf' => 'required|string|unique:users,cpf',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'cpf'      => 'required|string|unique:users,cpf',
             'password' => 'required|string|min:6',
+            'type'     => 'required|in:admin,vendedor,cliente',
         ]);
+
         $user = new User();
 
-        if(isset($user) && $request){
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->cpf = $request->cpf;
-            $user->password = Hash::make($request->password);
-            if($user){
-                $user->save();
-            }
+        $user->name     = $request->name;
+        $user->email    = $request->email;
+        $user->cpf      = $request->cpf;
+        $user->type     = $request->type;
+        $user->password = Hash::make($request->password);
 
+        $user->save();
 
-            return redirect()->route('usuario.index');
-        }
-        return view('errors.custom', ['message' => 'Erro ao salvar usuário.']);
+        return redirect()->route('usuario.index');
     }
 
     /**
@@ -65,7 +66,8 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
-        if (isset($user))  return view('usuario.show', compact('user'));;
+        if ($user)
+            return view('usuario.show', compact('user'));
 
         return view('errors.custom', ['message' => 'Usuário não encontrado.']);
     }
@@ -77,10 +79,15 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
+         $tipos = [
+            (object) ['id' => 'cliente', 'label' => 'Cliente'],
+            (object) ['id' => 'vendedor', 'label' => 'Vendedor'],
+            (object) ['id' => 'admin', 'label' => 'Administrador'],
+        ];
 
-        if(isset($user)){
-            return view('usuario.edit', compact('user'));
-        }
+        if ($user)
+            return view('usuario.edit', compact('user', 'tipos'));
+
         return view('errors.custom', ['message' => 'Usuário não encontrado para edição.']);
     }
 
@@ -91,16 +98,28 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
-        if(isset($user)){
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = Hash::make($request->password);
-            $user->save();
+        if (!$user)
+            return view('errors.custom', ['message' => 'Erro ao atualizar usuário.']);
 
-            return redirect()->route('usuario.index');
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => "required|email|unique:users,email,$id",
+            'cpf'   => "required|string|unique:users,cpf,$id",
+            'type'  => 'required|in:admin,vendedor,cliente',
+        ]);
+
+        $user->name  = $request->name;
+        $user->email = $request->email;
+        $user->cpf   = $request->cpf;
+        $user->type  = $request->type;
+
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
         }
 
-        return view('errors.custom', ['message' => 'Erro ao atualizar usuário.']);
+        $user->save();
+
+        return redirect()->route('usuario.index');
     }
 
     /**
@@ -110,9 +129,9 @@ class UserController extends Controller
     {
         $data = User::find($id);
 
-      if($data->delete())
-          return redirect()->route('usuario.index');
+        if ($data && $data->delete())
+            return redirect()->route('usuario.index');
 
-      return view('errors.custom', ['message' => 'Erro ao excluir usuário.']);
+        return view('errors.custom', ['message' => 'Erro ao excluir usuário.']);
     }
 }

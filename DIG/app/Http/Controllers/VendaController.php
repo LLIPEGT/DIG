@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DispenserAcao;
 use App\Models\Venda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -155,7 +156,7 @@ class VendaController extends Controller
         $venda->save();
 
 
-        return redirect()->route('venda.liberarDispensers', $venda->id);
+        return redirect()->route('venda.liberarDispensers', ['id' => $id]);
     }
 
     /**
@@ -213,17 +214,13 @@ class VendaController extends Controller
             return response()->json(['error' => 'Invalid JSON'], 400);
         }
 
-        // Try to find venda by explicit id, or by txid/reference
         $venda = null;
         if (!empty($data['venda_id'])) {
             $venda = Venda::find($data['venda_id']);
         }
         if (!$venda && !empty($data['reference'])) {
-            // reference may be stored in a coluna txid (not present currently) - try match
             $venda = Venda::where('txid', $data['reference'])->first();
         }
-
-        // If provider gives amount and we need to map, optionally try to find by amount+user
 
         if (!$venda) {
             return response()->json(['error' => 'Venda not found'], 404);
@@ -264,7 +261,11 @@ class VendaController extends Controller
         }
 
         $dispensers = $venda->produtos->filter(function ($produto) {
-            return $produto->dispenser;
+            return $produto->dispenser && (isset($produto->venda_tipo) && $produto->venda_tipo === 'kg');
+        })->filter(function ($produto) use ($venda) {
+            return !DispenserAcao::where('dispenser_id', $produto->dispenser->id)
+                ->where('venda_id', $venda->id)
+                ->exists();
         })->map(function ($produto) {
             return [
                 'dispenser' => $produto->dispenser,
@@ -274,7 +275,7 @@ class VendaController extends Controller
         });
 
         if ($dispensers->isEmpty()) {
-            return redirect()->back()->with('info', 'Não há dispensers para liberar nesta venda.');
+            return redirect()->route('venda.index');
         }
 
         return view('venda.liberarDispensers', compact('venda', 'dispensers'));

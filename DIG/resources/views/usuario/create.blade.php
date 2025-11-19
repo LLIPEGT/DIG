@@ -34,6 +34,15 @@
                                 type="password"
                                 placeholder="Seila123*"
                             />
+
+                            <x-selectbox
+                                name="type"
+                                label="Tipo de Usuário"
+                                :data="$tipos"
+                                field="label"
+                                :select="old('type', $user->type ?? '')"
+                            />
+
                             <button type="submit" class="btn btn-success btn-block">Salvar</button>
                             <a href="{{ route('usuario.index') }}" class="btn btn-secondary btn-block">Voltar</a>
                         </form>

@@ -13,27 +13,63 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Admin user
+        // Administrador
         $admin = User::create([
-            'name' => 'Admin',
+            'name' => 'Administrador',
             'email' => 'admin@example.com',
             'cpf' => '12345678900',
             'password' => Hash::make('123456'),
+            'type' => 'admin'
+        ]);
+
+        // Vendedor
+        $vendedor = User::create([
+            'name' => 'Vendedor Master',
+            'email' => 'vendedor@example.com',
+            'cpf' => '99988877766',
+            'password' => Hash::make('123456'),
+            'type' => 'vendedor'
         ]);
 
         // Clientes
         $clientes = [
-            ['name' => 'João Silva', 'email' => 'joao@example.com', 'cpf' => '11122233344', 'password' => Hash::make('123456')],
-            ['name' => 'Maria Santos', 'email' => 'maria@example.com', 'cpf' => '22233344455', 'password' => Hash::make('123456')],
-            ['name' => 'Pedro Oliveira', 'email' => 'pedro@example.com', 'cpf' => '33344455566', 'password' => Hash::make('123456')],
-            ['name' => 'Ana Costa', 'email' => 'ana@example.com', 'cpf' => '44455566677', 'password' => Hash::make('123456')],
+            [
+                'name' => 'João Silva',
+                'email' => 'joao@example.com',
+                'cpf' => '11122233344',
+                'password' => Hash::make('123456'),
+                'type' => 'cliente'
+            ],
+            [
+                'name' => 'Maria Santos',
+                'email' => 'maria@example.com',
+                'cpf' => '22233344455',
+                'password' => Hash::make('123456'),
+                'type' => 'cliente'
+            ],
+            [
+                'name' => 'Pedro Oliveira',
+                'email' => 'pedro@example.com',
+                'cpf' => '33344455566',
+                'password' => Hash::make('123456'),
+                'type' => 'cliente'
+            ],
+            [
+                'name' => 'Ana Costa',
+                'email' => 'ana@example.com',
+                'cpf' => '44455566677',
+                'password' => Hash::make('123456'),
+                'type' => 'cliente'
+            ],
         ];
 
         foreach ($clientes as $cliente) {
             User::create($cliente);
         }
 
-        // Marcas
+        // ---------------------
+        // MARCAS
+        // ---------------------
         $marcas = [
             ['nome' => 'Nutricão Animal Plus'],
             ['nome' => 'Pet Food Premium'],
@@ -46,7 +82,9 @@ class DatabaseSeeder extends Seeder
             $marcasIds[] = Marca::create($marca)->id;
         }
 
-        // Produtos
+        // ---------------------
+        // PRODUTOS
+        // ---------------------
         $produtos = [
             [
                 'nome' => 'Ração Premium Cães',
@@ -86,26 +124,28 @@ class DatabaseSeeder extends Seeder
             Produto::create($produto);
         }
 
-        // Vendas com produtos
+        // ---------------------
+        // VENDAS
+        // ---------------------
         $vendas = [
             [
-                'user_id' => 2,
+                'user_id' => 3, // João Silva
                 'valor_total' => 47.70,
                 'quantidade_total' => 3,
                 'status' => 'pago',
                 'forma_pagamento' => 'dinheiro',
                 'produtos' => [
-                    [1, 3, 15.90], // 3 unidades de Ração Premium
+                    [1, 3, 15.90],
                 ]
             ],
             [
-                'user_id' => 3,
+                'user_id' => 4, // Maria Santos
                 'valor_total' => 62.50,
                 'quantidade_total' => 5,
                 'status' => 'pago',
                 'forma_pagamento' => 'cartao_credito',
                 'produtos' => [
-                    [2, 5, 12.50], // 5kg de Ração Granel
+                    [2, 5, 12.50],
                 ]
             ],
         ];

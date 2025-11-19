@@ -27,7 +27,7 @@ class DispenserController extends Controller
     public function create()
     {
         $dispenser = new Dispenser();
-        $produtos = Produto::all();
+        $produtos = Produto::where('venda_tipo', 'kg')->get();
 
         if (isset($dispenser)) return view('dispenser.create', compact('dispenser', 'produtos'));
 
@@ -69,7 +69,7 @@ class DispenserController extends Controller
     public function edit(string $id)
     {
         $dispenser = Dispenser::find($id);
-        $produtos = Produto::all();
+        $produtos = Produto::where('venda_tipo', 'kg')->get();
 
         if (isset($dispenser)) return view('dispenser.edit', compact('dispenser', 'produtos'));
 
@@ -139,6 +139,19 @@ class DispenserController extends Controller
                     'executada_em'        => now(),
                 ]);
 
+                $venda = \App\Models\Venda::with(['produtos.dispenser'])->find($request->venda_id);
+                $pendentes = $venda->produtos->filter(function ($produto) {
+                    return $produto->dispenser && (isset($produto->venda_tipo) && $produto->venda_tipo === 'kg');
+                })->filter(function ($produto) use ($request) {
+                    return !DispenserAcao::where('dispenser_id', $produto->dispenser->id)
+                        ->where('venda_id', $request->venda_id)
+                        ->exists();
+                });
+
+                if ($pendentes->isEmpty()) {
+                    return redirect()->route('venda.index')->with('success', 'Todos os dispensers foram liberados!');
+                }
+
                 return back()->with('success', "Dispenser '{$dispenser->nome}' liberado com sucesso!");
             } else {
                 return view('errors.custom', ['message' => "Falha ao liberar dispenser (HTTP {$response->status()})."]);
@@ -152,6 +165,7 @@ class DispenserController extends Controller
             return view('errors.custom', ['message' => 'Falha ao comunicar com o dispenser: ' . $e->getMessage()]);
         }
     }
+
 
 }
 
