@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Administrador',
             'email' => 'admin@example.com',
-            'cpf' => '12345678900',
+            'cpf' => 'cleaclear',
             'password' => Hash::make('123456'),
             'type' => 'admin'
         ]);
